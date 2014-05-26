@@ -1,0 +1,21 @@
+run tests
+  $ rspec
+
+results:
+
+rspec ./spec/validate_valvat_spec.rb:93 # Invoice with valid vat number EU123456789 should be valid vat number
+rspec ./spec/validate_valvat_spec.rb:97 # Invoice with valid vat number EU123456789 is provided as vat_number and country code EU
+rspec ./spec/validate_valvat_spec.rb:93 # Invoice with valid vat number EU987654321 should be valid vat number
+rspec ./spec/validate_valvat_spec.rb:97 # Invoice with valid vat number EU987654321 is provided as vat_number and country code EU
+rspec ./spec/validate_valvat_spec.rb:118 # Invoice with invalid vat number ATu12345678 should not be valid vat number
+rspec ./spec/validate_valvat_spec.rb:118 # Invoice with invalid vat number CY12345678j should not be valid vat number
+rspec ./spec/validate_valvat_spec.rb:118 # Invoice with invalid vat number ESa1234567a should not be valid vat number
+rspec ./spec/validate_valvat_spec.rb:118 # Invoice with invalid vat number FRIX123456789 should not be valid vat number
+rspec ./spec/validate_valvat_spec.rb:118 # Invoice with invalid vat number FROX123456789 should not be valid vat number
+rspec ./spec/validate_valvat_spec.rb:118 # Invoice with invalid vat number FRXI123456789 should not be valid vat number
+rspec ./spec/validate_valvat_spec.rb:118 # Invoice with invalid vat number FRXO123456789 should not be valid vat number
+rspec ./spec/validate_valvat_spec.rb:118 # Invoice with invalid vat number FRaa123456789 should not be valid vat number
+rspec ./spec/validate_valvat_spec.rb:118 # Invoice with invalid vat number IE6X12345A should not be valid vat number
+rspec ./spec/validate_valvat_spec.rb:118 # Invoice with invalid vat number IE9a12345A should not be valid vat number
+rspec ./spec/validate_valvat_spec.rb:118 # Invoice with invalid vat number IE9X12345a should not be valid vat number
+rspec ./spec/validate_valvat_spec.rb:118 # Invoice with invalid vat number GB98 765 423 1 should not be valid vat number
