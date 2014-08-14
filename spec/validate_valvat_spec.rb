@@ -1,7 +1,7 @@
 require 'spec_helper'
 if defined?(ModelBase)
   class Invoice < ModelBase
-    validates :vat_number, :valvat => true
+    validates :vat_number, valvat: {lookup: true}
   end
 
   class TestAllowBlank < ModelBase
@@ -18,26 +18,15 @@ if defined?(ModelBase)
 end
 
 VALID_VAT_NUMBERS = %w(
-  ATU15138205 ATU46080404 ATU61195628 BE0453521619 BE0474840437 BG130544585
-  BG130736984 CZ26780259 CZ49620819 DE112144487 DE119817125 DK10290813
-  DK18661306 DK21832073 DK26210895 EE100878938 EE100919295 EL094501040
-  EL095723304 ESA78109592 ESA79220109 ESB80067358 ESG0061466I FI04695196
-  FI15408594 FR01712030113 FR64333266765 FR84350934675 FR95483929956
-  gb123456789 GB123456789012 GB195275334 GB642423951 GB750323267 GB759713196
-  GB987654321 gbGD123 gbHA456 HU10268492 HU12078503 IE9507061A IE9Y71814N
-  IT00743110157 IT02087050155 IT08041000012 IT11492960155 LT100002894215
-  LT290068995116 LU15027442 LU21416127 LV40003638595 LV50003087101
-  MT15220517 MT17365728 NL001545668B01 NL008810151B01 PL5260000821
-  PL5261025421 PL6772135826 PT501301135 PT503038083 RO16241790 RO2413020
-  SE502052817901 SE556043606401 SE556229159001 SI37568833 SI97093726
+  ATU46080404 ATU61195628 BE0453521619 BG130736984 CZ26780259 CZ49620819
+  DE112144487 DE119817125 DK10290813 DK21832073 DK26210895 EE100878938
+  EE100919295 EL094501040 EL095723304 FI15408594 FR01712030113 FR64333266765
+  FR84350934675 GB759713196 HU12078503 IE9507061A IT00743110157
+  LT100002894215 LU15027442 LU21416127 LV40003638595 LV50003087101
+  MT15220517 MT17365728 PL5261025421 PL6772135826 PT501301135
+  PT503038083 RO16241790 RO2413020 SE502052817901 SE556043606401 SI97093726
   SK2020133082 SK2020349045
-  CY12345678A CY87654321Z
-  EU123456789 EU987654321
-) +
-[
-  'GB987 6543 21', 'GB842 0753 41', 'gb123 4567 89', 'DK99 99 99 99',
-  'FR99 123456789'
-]
+)
 
 INVALID_VAT_PICTURES = %w(
   gb1234567890 gb12345678
@@ -86,17 +75,18 @@ INVALID_VAT_PICTURES = %w(
 describe Invoice do
   context "with valid vat number" do
     it "should be valid" do
-      Invoice.new(:vat_number => "DE259597697").should be_valid
+      expect(Invoice.new(vat_number: "DE259597697")).to be_valid
     end
 
     VALID_VAT_NUMBERS.each do |vat_number|
       it "#{vat_number} should be valid vat number" do
-        Invoice.new(:vat_number => vat_number).should be_valid
+        expect(Invoice.new(vat_number: vat_number)).to be_valid
       end
 
       it "#{vat_number} is provided as vat_number and country code #{vat_number[0..1]}" do
         temp = Invoice.new(:vat_number => vat_number, :country => vat_number[0..1])
-        temp.should be_valid
+
+        expect(temp).to be_valid
       end
     end
 
@@ -106,25 +96,26 @@ describe Invoice do
     let(:invoice) { Invoice.new(:vat_number => "DE259597697123") }
 
     it "should not be valid" do
-      invoice.should_not be_valid
+      expect(invoice).to_not be_valid
     end
 
     it "should add default (country specific) error message" do
       invoice.valid?
-      invoice.errors[:vat_number].should eq(["is not a valid German vat number"])
+
+      expect(invoice.errors[:vat_number]).to include "is not a valid German vat number"
     end
 
     INVALID_VAT_PICTURES.each do |vat_number|
       it "#{vat_number} should not be valid vat number" do
-        Invoice.new(:vat_number => vat_number).should_not be_valid
+        expect(Invoice.new(vat_number: vat_number)).to_not be_valid
       end
     end
   end
 
  context "with blank vat number" do
     it "should not be valid" do
-      Invoice.new(:vat_number => "").should_not be_valid
-      Invoice.new(:vat_number => nil).should_not be_valid
+      expect(Invoice.new(vat_number: "")).to_not be_valid
+      expect(Invoice.new(vat_number: nil)).to_not be_valid
     end
   end
 end
@@ -132,39 +123,41 @@ end
 describe TestAllowBlank do
  context "with blank vat number" do
     it "should be valid" do
-      TestAllowBlank.new(:vat_number => "").should be_valid
-      TestAllowBlank.new(:vat_number => nil).should be_valid
+      expect(TestAllowBlank.new(vat_number: "")).to be_valid
+      expect(TestAllowBlank.new(vat_number: nil)).to be_valid
     end
   end
 end
 
 describe TestMatchCountry do
   it "should be not valid on blank country" do
-    TestMatchCountry.new(:country => nil, :vat_number => "DE259597697").should_not be_valid
-    TestMatchCountry.new(:country => "", :vat_number => "DE259597697").should_not be_valid
+    expect(TestMatchCountry.new(country: nil, vat_number: "DE259597697")).to_not be_valid
+    expect(TestMatchCountry.new(country: "", vat_number: "DE259597697")).to_not be_valid
   end
 
   it "should be valid on matching country" do
-    TestMatchCountry.new(:country => "DE", :vat_number => "DE259597697").should be_valid
-    TestMatchCountry.new(:country => "AT", :vat_number => "ATU65931334").should be_valid
+    expect(TestMatchCountry.new(country: "DE", vat_number: "DE259597697")).to be_valid
+    expect(TestMatchCountry.new(country: "AT", vat_number: "ATU65931334")).to be_valid
   end
 
   it "should be not valid on mismatching (eu) country" do
-    TestMatchCountry.new(:country => "FR", :vat_number => "DE259597697").should_not be_valid
-    TestMatchCountry.new(:country => "AT", :vat_number => "DE259597697").should_not be_valid
-    TestMatchCountry.new(:country => "DE", :vat_number => "ATU65931334").should_not be_valid
+    expect(TestMatchCountry.new(country: "FR", vat_number: "DE259597697")).to_not be_valid
+    expect(TestMatchCountry.new(country: "AT", vat_number: "DE259597697")).to_not be_valid
+    expect(TestMatchCountry.new(country: "DE", vat_number: "ATU65931334")).to_not be_valid
   end
 
   it "should give back error message with country from :country_match" do
     invoice = TestMatchCountry.new(:country => "FR", :vat_number => "DE259597697")
     invoice.valid?
-    invoice.errors[:vat_number].should eql(["is not a valid French vat number"])
+
+    expect(invoice.errors[:vat_number]).to include "is not a valid French vat number"
   end
 
   it "should give back error message with country from :country_match even on invalid vat number" do
     invoice = TestMatchCountry.new(:country => "FR", :vat_number => "DE259597697123")
     invoice.valid?
-    invoice.errors[:vat_number].should eql(["is not a valid French vat number"])
+
+    expect(invoice.errors[:vat_number]).to include "is not a valid French vat number"
   end
 
 end
